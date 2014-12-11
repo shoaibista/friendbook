@@ -21,7 +21,7 @@
     </title>
     <link rel="shortcut icon" type="image/png" href="http://hello.eboy.com/eboy/wp-content/uploads/2013/09/RZR-Akuma-09k-16.png"/>
     <script>
-        var student_list=function(){
+        var studentList=function(){
             var resultsToBeReturned = new Array();
             var callbackProxy = function(results) {
                 for (var i = 0; i < results.length; i++) {
@@ -34,10 +34,10 @@
             return resultsToBeReturned;
         }
 
-        var studentList=student_list()
+//        var studentList=student_list()
         function getAllStudents(){
             $( "#studentAutocompleter" ).autocomplete({
-                source:studentList
+                source:studentList()
             });
         }
     </script>

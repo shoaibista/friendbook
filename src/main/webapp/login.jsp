@@ -11,7 +11,7 @@
 ${sessionScope["SPRING_SECURITY_LAST_EXCEPTION"].message}
 <form action="<c:url value='/j_spring_security_check'/>" method="post">
     Username<input type="text" name="j_username"/><br/>
-    Password<input type="text" name="j_password"/><br/>
+    Password<input type="password" name="j_password"/><br/>
     <input type="submit"/>
 </form>
 </body>
