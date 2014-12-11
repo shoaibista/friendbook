@@ -1,0 +1,10 @@
+<decorators defaultdir="/decorators">
+    <!-- Decorator for pages which need Sidemenu -->
+    <decorator name="sidemenu" page="sidemenu.jsp">
+        <pattern>/home.jsp</pattern>
+    </decorator>
+    <!-- Decorator for pages which need header and footer -->
+    <decorator name="headerfooter" page="headerfooter.jsp">
+        <pattern>/*</pattern>
+    </decorator>
+</decorators>

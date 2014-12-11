@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<project name="friendbook" default="war" xmlns:ivy="antlib:org.apache.ivy.ant">
+    <property file="build.properties"/>
+    <property file="ivy.properties"/>
+    <property environment="env"/>
+
+    <!--Creating own tag which can be used at many places-->
+    <macrodef name="copy-resources" description="copies files from src to dest">
+        <attribute name="src"/>
+        <attribute name="dest"/>
+        <sequential>
+            <copy todir="@{dest}">
+                <fileset dir="@{src}" includes="**/*.*">
+                </fileset>
+            </copy>
+        </sequential>
+    </macrodef>
+
+
+    <target name="resolve" depends="clean-lib,init">
+        <ivy:configure />
+        <ivy:resolve file="${ivy.dep.file}" conf="${ivy.configurations}" />
+        <ivy:retrieve pattern="${build.lib.dir}/${ivy.retrieve.pattern}" conf="${ivy.configurations}" />
+        <copy-resources src="${build.lib.dir}" dest="${webapp.dir}/WEB-INF/lib"/>
+    </target>
+    <!-- =================================
+    Initialise Ivy. Sets custom ivy.settings.xml file
+   ================================= -->
+    <path id="ivy.lib.path">
+        <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
+    </path>
+    <taskdef resource="org/apache/ivy/ant/antlib.xml"
+             uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+
+    <!-- ====================================================
+      condition : ivy.available
+      Checks whether in particular file is present or not
+      =======================================================-->
+
+    <condition property="ivy.available">
+        <available file="${ivy.jar.file}"/>
+    </condition>
+
+
+
+
+    <!-- ====================================================
+   target : download-ivy
+   Download ivy if one is not available.
+   =======================================================-->
+
+    <target name="download-ivy" unless="ivy.available">
+        <mkdir dir="${ivy.jar.dir}"/>
+        <echo message="Downloading IVY....."/>
+        <get src="${ivy.jar.location}" dest="${ivy.jar.file}" usetimestamp="true"/>
+    </target>
+
+
+
+
+    <path id="main.lib.jar">
+        <fileset dir="${web-inf.dir}/lib" includes="**/*.jar"/>
+    </path>
+
+    <!--make webapp folder-->
+    <target name="init" depends="clean">
+      <echo>${build.dir}</echo>
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.classes.dir}"/>
+        <mkdir dir="${webapp.dir}"/>
+        <mkdir dir="${web-inf.dir}"/>
+        <mkdir dir="${web-inf.dir}/classes"/>
+        <mkdir dir="${web-inf.dir}/lib"/>
+        <mkdir dir="${build.lib.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+    </target>
+
+
+    <target name="init-war" description="creates the directories necessary for the exploded war">
+        <mkdir dir="${war.dir}"/>
+        <mkdir dir="${war.dir}/WEB-INF"/>
+        <mkdir dir="${war.dir}/WEB-INF/lib"/>
+        <mkdir dir="${war.dir}/WEB-INF/classes"/>
+        <mkdir dir="${war.dir}/WEB-INF/classes/META-INF"/>
+    </target>
+
+    <!--target: clean-war-->
+    <!--=============================================================&ndash;&gt;-->
+    <target name="clean-war">
+        <delete dir="${dist.dir}/${war.filename}"/>
+        <delete dir="${war.dir}"/>
+    </target>
+
+
+
+    <target name="clean">
+        <delete dir="${web-inf.dir}/classes" includeemptydirs="true"/>
+        <delete dir="${build.classes.dir}" includeemptydirs="true"/>
+        <delete dir="${dist.dir}" includeemptydirs="true"/>
+    </target>
+
+    <target name="clean-lib">
+        <delete dir="${web-inf.dir}/lib" includeemptydirs="true"/>
+        <delete dir="${build.lib.dir}" includeemptydirs="true"/>
+    </target>
+
+
+
+
+    <!--This target compile all the java files which are present at java folder-->
+    <!--and copy them to classes folder of WEB-INF
+
+    -->
+    <target name="compile" depends="init">
+        <echo>${main.java}</echo>
+        <javac srcdir="${main.java}"  destdir="${build.classes.dir}"
+               target="1.6" classpathref="main.lib.jar">
+        </javac>
+        <copy-resources src="${build.classes.dir}" dest="${webapp.dir}/WEB-INF/classes"/>
+    </target>
+
+
+    <target name="makejar" depends="compile">
+        <jar destfile="${dist.dir}/${projectname}.jar" basedir="${webapp.dir}"/>
+    </target>
+
+    <!--<target name="war" depends="clean-war, init-war">-->
+    <target name="war" depends="resolve,compile,clean-war,init-war">
+        <copy-resources src="${build.classes.dir}" dest="${war.dir}/WEB-INF/classes"/>
+        <copy-resources src="${webapp.dir}" dest="${war.dir}"/>
+
+        <war destfile="${dist.dir}/${war.filename}" basedir="${war.dir}"
+             webxml="${web-inf.dir}/web.xml">
+        </war>
+    </target>
+</project>
